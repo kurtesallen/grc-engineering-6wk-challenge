@@ -36,3 +36,7 @@ Thumbs.db
 *.tar.gz
 crash.log
 crash.*.log
+
+*.lnk
+*.tfplan
+tfplan
