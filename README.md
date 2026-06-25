@@ -143,6 +143,6 @@ Automate evidence collection
 
 Govern the entire system through CI/CD
 
-By the end of the challenge, this repo becomes a complete, auditable, continuously compliant cloud application.
+By the end of the challenge, this repo will become a complete, auditable, continuously compliant cloud application.
 =======
->>>>>>> bc12edf (Week 2: Added SC-28 policy, full OPA test suite (6/6 passing), repo cleanup and restructure)
+
