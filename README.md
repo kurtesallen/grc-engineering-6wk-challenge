@@ -144,5 +144,5 @@ Automate evidence collection
 Govern the entire system through CI/CD
 
 By the end of the challenge, this repo will become a complete, auditable, continuously compliant cloud application.
-=======
+
 
