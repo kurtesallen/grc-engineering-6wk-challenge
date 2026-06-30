@@ -6,22 +6,27 @@
 crash.log
 crash.*.log
 
+# ------------------------------------------------------------
 # Terraform working directories
+# ------------------------------------------------------------
 .terraform/
 .terraform.lock.hcl
 
+# ------------------------------------------------------------
 # Terraform plan binaries (safe to ignore)
+# ------------------------------------------------------------
 *.tfplan
 *.binary
 
 # ------------------------------------------------------------
-# Evidence bundles (but DO NOT ignore week1/evidence/)
+# Evidence bundles (root-level only)
+# DO NOT ignore week1/evidence/ because Week 3 requires plan.json
 # ------------------------------------------------------------
 /evidence/
 evidence-*.tar.gz
 *.tar.gz
 
-# Allow Week 1 evidence folder to be committed
+# Allow Week 1 evidence to be committed
 !week1/evidence/
 !week1/evidence/plan.json
 
@@ -42,5 +47,7 @@ conftest-results.txt
 .DS_Store
 Thumbs.db
 
+# ------------------------------------------------------------
 # Windows shortcuts
+# ------------------------------------------------------------
 *.lnk
