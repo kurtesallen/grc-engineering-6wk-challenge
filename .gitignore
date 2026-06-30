@@ -1,42 +1,46 @@
-# Terraform state
+# ------------------------------------------------------------
+# Terraform state (never commit)
+# ------------------------------------------------------------
 *.tfstate
 *.tfstate.*
 crash.log
 crash.*.log
 
-# Terraform plans
-*.tfplan
-*.binary
-tfplan.json
-
-# Terraform working dirs
+# Terraform working directories
 .terraform/
 .terraform.lock.hcl
 
-# Conftest artifacts
-conftest-results.txt
+# Terraform plan binaries (safe to ignore)
+*.tfplan
+*.binary
 
-# Evidence bundles
-evidence/
+# ------------------------------------------------------------
+# Evidence bundles (but DO NOT ignore week1/evidence/)
+# ------------------------------------------------------------
+/evidence/
 evidence-*.tar.gz
 *.tar.gz
 
+# Allow Week 1 evidence folder to be committed
+!week1/evidence/
+!week1/evidence/plan.json
+
+# ------------------------------------------------------------
+# Conftest artifacts (local only)
+# ------------------------------------------------------------
+conftest-results.txt
+
+# ------------------------------------------------------------
 # Local environment files
+# ------------------------------------------------------------
 *.env
 *.local
 
+# ------------------------------------------------------------
 # OS junk
+# ------------------------------------------------------------
 .DS_Store
 Thumbs.db
 
-.terraform/
-*.tfstate
-*.tfstate.*
-*.tfplan
-*.tar.gz
-crash.log
-crash.*.log
-
+# Windows shortcuts
 *.lnk
-*.tfplan
-tfplan
