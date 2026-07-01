@@ -1,4 +1,4 @@
-
+Anti-check Box
 GRC Engineering 6‑Week Challenge
 End‑to‑End Governed Cloud Application
 This repository contains the full 6‑week GRC Engineering Challenge: an end‑to‑end governed cloud application that evolves from compliant infrastructure (Week 1) to a fully automated governance pipeline (Week 6).
