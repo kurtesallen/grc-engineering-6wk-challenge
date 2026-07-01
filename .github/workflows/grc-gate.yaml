@@ -42,6 +42,10 @@ jobs:
             --policy week2/policies \
             --output json \
             > evidence/conftest-results.json
+      - name: Debug working directory
+        run: |
+          pwd
+          ls -R .
 
       # ------------------------------------------------------------
       # Fail the job if any policy namespace reports a failure
