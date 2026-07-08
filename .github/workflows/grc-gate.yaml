@@ -19,15 +19,9 @@ jobs:
       pull-requests: write
 
     steps:
-      # ------------------------------------------------------------
-      # Checkout repository
-      # ------------------------------------------------------------
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # ------------------------------------------------------------
-      # Install Conftest (PINNED VERSION)
-      # ------------------------------------------------------------
       - name: Install Conftest
         run: |
           curl -L \
@@ -37,9 +31,6 @@ jobs:
           sudo mv conftest /usr/local/bin/
           conftest --version
 
-      # ------------------------------------------------------------
-      # Debug: show runner environment
-      # ------------------------------------------------------------
       - name: Debug working directory
         run: |
           echo "PWD:"
@@ -49,9 +40,6 @@ jobs:
           echo "Checking for plan.json:"
           ls -l week1/evidence/plan.json || echo "plan.json not found"
 
-      # ------------------------------------------------------------
-      # Run the policy gate
-      # ------------------------------------------------------------
       - name: Run policy gate
         run: |
           mkdir -p evidence
@@ -60,9 +48,6 @@ jobs:
             --output json \
             > evidence/conftest-results.json
 
-      # ------------------------------------------------------------
-      # Fail the job if any policy namespace reports a failure
-      # ------------------------------------------------------------
       - name: Fail if policies fail
         run: |
           if grep -q '"fail"' evidence/conftest-results.json; then
@@ -72,9 +57,6 @@ jobs:
             echo "✅ All policy namespaces passed"
           fi
 
-      # ------------------------------------------------------------
-      # WEEK 4: Bundle, hash, and sign evidence (always runs)
-      # ------------------------------------------------------------
       - name: Bundle evidence directory
         if: always()
         run: tar -czf evidence.tar.gz evidence/
@@ -83,7 +65,6 @@ jobs:
         if: always()
         run: sha256sum evidence.tar.gz | awk '{print $1}' > evidence.tar.gz.sha256
 
-      # Install Cosign (PINNED VERSION)
       - name: Install Cosign
         if: always()
         run: |
@@ -100,9 +81,6 @@ jobs:
           id-token: write
         run: cosign sign-blob --yes --bundle evidence.sig.bundle evidence.tar.gz
 
-      # ------------------------------------------------------------
-      # Upload all evidence + signed bundle
-      # ------------------------------------------------------------
       - name: Upload signed evidence artifacts
         if: always()
         uses: actions/upload-artifact@v4
