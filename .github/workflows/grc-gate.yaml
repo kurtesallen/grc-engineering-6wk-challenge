@@ -13,7 +13,6 @@ jobs:
   grc-gate:
     runs-on: ubuntu-latest
 
-    # Job-level permissions (required for step-level permissions)
     permissions:
       id-token: write
       contents: read
@@ -76,7 +75,6 @@ jobs:
       # ------------------------------------------------------------
       # WEEK 4: Bundle, hash, and sign evidence (always runs)
       # ------------------------------------------------------------
-
       - name: Bundle evidence directory
         if: always()
         run: tar -czf evidence.tar.gz evidence/
