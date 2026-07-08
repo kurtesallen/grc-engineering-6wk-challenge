@@ -28,7 +28,7 @@ jobs:
             https://github.com/open-policy-agent/conftest/releases/download/v0.52.0/conftest_0.52.0_Linux_x86_64.tar.gz \
             -o conftest.tar.gz
           tar -xzf conftest.tar.gz
-          sudo mv conftest /usr/local/bin/
+          mv conftest /usr/local/bin/
           conftest --version
 
       - name: Debug working directory
@@ -47,6 +47,45 @@ jobs:
             --policy week2/policies \
             --output json \
             > evidence/conftest-results.json
+
+      - name: Post Policy Results to PR Comment
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = 'evidence/conftest-results.json';
+            
+            if (!fs.existsSync(path)) {
+              core.warning("Conftest output JSON not found. Skipping PR comment.");
+              return;
+            }
+            
+            const results = JSON.parse(fs.readFileSync(path, 'utf8'));
+            
+            let commentBody = `### 🛡️ GRC Policy Gate Report\n\n`;
+            commentBody += `| Policy File | Namespace | Successes | Failures | Warnings |\n`;
+            commentBody += `| :--- | :--- | :---: | :---: | :---: |\n`;
+            
+            let totalFailures = 0;
+            
+            results.forEach(res => {
+              const failures = res.failures ? res.failures.length : 0;
+              const warnings = res.warnings ? res.warnings.length : 0;
+              const successes = res.successes || 0;
+              totalFailures += failures;
+              
+              commentBody += `| \`${res.filename}\` | \`${res.namespace}\` | ${successes} | ${failures > 0 ? '❌ ' + failures : '✅ 0'} | ${warnings > 0 ? '⚠️ ' + warnings : '0'} |\n`;
+            });
+            
+            commentBody += `\n**Status:** ${totalFailures > 0 ? '❌ Policy execution failed. Please fix violations.' : '✅ All constraints passed validation.'}`;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: commentBody
+            });
 
       - name: Fail if policies fail
         run: |
@@ -72,7 +111,7 @@ jobs:
           curl -L "https://github.com/sigstore/cosign/releases/download/${COSIGN_VERSION}/cosign-linux-amd64" \
             -o cosign
           chmod +x cosign
-          sudo mv cosign /usr/local/bin/
+          mv cosign /usr/local/bin/
           cosign version
 
       - name: Keyless sign evidence bundle
