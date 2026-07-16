@@ -2,7 +2,7 @@ name: grc-gate
 
 on:
   pull_request:
-    branches: [main]
+    branches: [ main ]
   workflow_dispatch:
 
 permissions:
@@ -12,7 +12,6 @@ permissions:
 jobs:
   grc-gate:
     runs-on: ubuntu-latest
-
     permissions:
       id-token: write
       contents: read
@@ -22,6 +21,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Terraform sanity + plan generation
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform fmt / validate / plan
+        run: |
+          terraform fmt -check
+          terraform init -input=false
+          terraform validate
+          terraform plan -out tfplan
+          terraform show -json tfplan > week1/evidence/plan.json
+
       - name: Install Conftest
         run: |
           curl -L \
@@ -30,15 +41,6 @@ jobs:
           tar -xzf conftest.tar.gz
           mv conftest /usr/local/bin/
           conftest --version
-
-      - name: Debug working directory
-        run: |
-          echo "PWD:"
-          pwd
-          echo "Repository contents:"
-          ls -R .
-          echo "Checking for plan.json:"
-          ls -l week1/evidence/plan.json || echo "plan.json not found"
 
       - name: Run policy gate
         run: |
@@ -55,31 +57,23 @@ jobs:
           script: |
             const fs = require('fs');
             const path = 'evidence/conftest-results.json';
-            
             if (!fs.existsSync(path)) {
               core.warning("Conftest output JSON not found. Skipping PR comment.");
               return;
             }
-            
             const results = JSON.parse(fs.readFileSync(path, 'utf8'));
-            
             let commentBody = `### 🛡️ GRC Policy Gate Report\n\n`;
             commentBody += `| Policy File | Namespace | Successes | Failures | Warnings |\n`;
             commentBody += `| :--- | :--- | :---: | :---: | :---: |\n`;
-            
             let totalFailures = 0;
-            
             results.forEach(res => {
               const failures = res.failures ? res.failures.length : 0;
               const warnings = res.warnings ? res.warnings.length : 0;
               const successes = res.successes || 0;
               totalFailures += failures;
-              
               commentBody += `| \`${res.filename}\` | \`${res.namespace}\` | ${successes} | ${failures > 0 ? '❌ ' + failures : '✅ 0'} | ${warnings > 0 ? '⚠️ ' + warnings : '0'} |\n`;
             });
-            
             commentBody += `\n**Status:** ${totalFailures > 0 ? '❌ Policy execution failed. Please fix violations.' : '✅ All constraints passed validation.'}`;
-            
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -116,7 +110,17 @@ jobs:
 
       - name: Keyless sign evidence bundle
         if: always()
-        run: cosign sign-blob --yes --bundle evidence.sig.bundle evidence.tar.gz
+        run: |
+          cosign sign-blob --yes --bundle evidence.sig.bundle evidence.tar.gz
+
+      - name: Verify signed evidence bundle (provenance)
+        if: always()
+        run: |
+          cosign verify-blob \
+            --bundle evidence.sig.bundle \
+            --certificate-identity-regexp "https://github.com/${{ github.repository }}/.*" \
+            --certificate-oidc-issuer-regexp "https://token.actions.githubusercontent.com.*" \
+            evidence.tar.gz
 
       - name: Upload signed evidence artifacts
         if: always()

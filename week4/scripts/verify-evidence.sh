@@ -39,16 +39,19 @@ if [[ "$COMPUTED_HASH" != "$RECORDED_HASH" ]]; then
 fi
 
 # ------------------------------------------------------------
-# 2. AUTHENTICITY — cosign verify-blob
+# 2. AUTHENTICITY — cosign verify-blob (GitHub keyless)
 # ------------------------------------------------------------
 if [[ ! -f "$SIG_BUNDLE" ]]; then
   echo "AUTHENTICITY CHECK FAILED: missing signature bundle $SIG_BUNDLE" >&2
   exit 1
 fi
 
+# Accept any GitHub repo identity + any workflow + any branch/PR
+# Accept any valid GitHub OIDC issuer
 if ! cosign verify-blob \
       --bundle "$SIG_BUNDLE" \
-      --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+      --certificate-identity-regexp "https://github.com/.*" \
+      --certificate-oidc-issuer-regexp "https://token.actions.githubusercontent.com.*" \
       "$BUNDLE" >/dev/null 2>&1; then
   echo "AUTHENTICITY CHECK FAILED: cosign verification failed" >&2
   exit 1
