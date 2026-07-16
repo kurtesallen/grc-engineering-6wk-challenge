@@ -30,6 +30,16 @@ evidence-*.tar.gz
 !week1/evidence/
 !week1/evidence/plan.json
 
+# Week 5 evidence contains sensitive data 
+# Security Hub findings exports
+security-hub-findings.json
+security-hub-findings.json.sig
+
+# Any variations or backups
+security-hub-findings*.json
+security-hub-findings*.sig
+
+
 # ------------------------------------------------------------
 # Conftest artifacts (local only)
 # ------------------------------------------------------------
