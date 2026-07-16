@@ -39,6 +39,12 @@ security-hub-findings.json.sig
 security-hub-findings*.json
 security-hub-findings*.sig
 
+# ------------------------------------------------------------
+# Keys and sensitive cryptographic material
+# ------------------------------------------------------------
+*.pem
+*.key
+*.crt
 
 # ------------------------------------------------------------
 # Conftest artifacts (local only)
